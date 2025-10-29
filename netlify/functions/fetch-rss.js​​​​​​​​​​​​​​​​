@@ -1,6 +1,7 @@
 const Parser = require(‘rss-parser’);
 const fetch = require(‘node-fetch’);
 
+
 const parser = new Parser({
 customFields: {
 item: [‘description’, ‘content:encoded’, ‘pubDate’]
