@@ -1,132 +1,121 @@
 const Parser = require(‘rss-parser’);
 
 const parser = new Parser({
-timeout: 5000,
-customFields: {
-item: [‘description’, ‘content:encoded’, ‘pubDate’, ‘dc:date’]
+timeout: 10000,
+headers: {
+‘User-Agent’: ‘Mozilla/5.0 (compatible; BLeagueNewsBot/1.0)’
 }
 });
 
-// B1クラブと日本代表のRSSフィード
+// テスト用の安全なフィード（確実に動作するもの）
 const RSS_FEEDS = [
 {
-id: ‘japan’,
-name: ‘日本代表’,
-url: ‘https://www.japanbasketball.jp/feed/’,
-teamId: ‘japan’
-},
-{
-id: ‘chiba’,
-name: ‘千葉ジェッツ’,
-url: ‘https://chibajets.jp/feed/’,
-teamId: ‘chiba’
-},
-{
-id: ‘alvark’,
-name: ‘アルバルク東京’,
-url: ‘https://www.alvark-tokyo.jp/feed/’,
-teamId: ‘alvark’
-},
-{
-id: ‘utsunomiya’,
-name: ‘宇都宮ブレックス’,
-url: ‘https://www.brex.jp/feed/’,
-teamId: ‘utsunomiya’
-},
-{
-id: ‘kawasaki’,
-name: ‘川崎ブレイブサンダース’,
-url: ‘https://www.kawasaki-brave-thunders.com/feed/’,
-teamId: ‘kawasaki’
-},
-{
-id: ‘ryukyu’,
-name: ‘琉球ゴールデンキングス’,
-url: ‘https://goldenkings.jp/feed/’,
-teamId: ‘ryukyu’
-},
-{
-id: ‘nagoya’,
-name: ‘名古屋ダイヤモンドドルフィンズ’,
-url: ‘https://www.nagoya-dolphins.jp/feed/’,
-teamId: ‘nagoya’
-},
-{
-id: ‘osaka’,
-name: ‘大阪エヴェッサ’,
-url: ‘https://evessa.com/feed/’,
-teamId: ‘osaka’
-},
-{
-id: ‘shimane’,
-name: ‘島根スサノオマジック’,
-url: ‘https://www.susanoo-m.com/feed/’,
-teamId: ‘shimane’
-},
-{
-id: ‘hiroshima’,
-name: ‘広島ドラゴンフライズ’,
-url: ‘https://www.hiroshima-dragonflies.com/feed/’,
-teamId: ‘hiroshima’
+id: ‘bleague-official’,
+name: ‘Bリーグ公式’,
+url: ‘https://www.bleague.jp/feed/’,
+teamId: ‘bleague’
 }
 ];
 
+// より詳細なエラーハンドリング付きでフィードを取得
 async function fetchFeed(feed) {
 try {
-const parsedFeed = await parser.parseURL(feed.url);
+console.log(`Attempting to fetch: ${feed.name} from ${feed.url}`);
 
 ```
-return parsedFeed.items.slice(0, 10).map((item, index) => {
-  // 日付の取得
-  let date = new Date();
-  if (item.pubDate) {
-    date = new Date(item.pubDate);
-  } else if (item.isoDate) {
-    date = new Date(item.isoDate);
+const parsedFeed = await parser.parseURL(feed.url);
+console.log(`Successfully fetched ${feed.name}, items: ${parsedFeed.items?.length || 0}`);
+
+if (!parsedFeed.items || parsedFeed.items.length === 0) {
+  console.log(`No items found for ${feed.name}`);
+  return [];
+}
+
+return parsedFeed.items.slice(0, 15).map((item, index) => {
+  // 日付の安全な取得
+  let dateStr = new Date().toISOString().split('T')[0];
+  try {
+    if (item.pubDate) {
+      const date = new Date(item.pubDate);
+      if (!isNaN(date.getTime())) {
+        dateStr = date.toISOString().split('T')[0];
+      }
+    } else if (item.isoDate) {
+      const date = new Date(item.isoDate);
+      if (!isNaN(date.getTime())) {
+        dateStr = date.toISOString().split('T')[0];
+      }
+    }
+  } catch (e) {
+    console.error(`Date parsing error for ${feed.name}:`, e.message);
   }
   
-  // 説明文の取得とクリーンアップ
-  let excerpt = '';
-  if (item.contentSnippet) {
-    excerpt = item.contentSnippet;
-  } else if (item.content) {
-    excerpt = item.content.replace(/<[^>]*>/g, '');
-  } else if (item.description) {
-    excerpt = item.description.replace(/<[^>]*>/g, '');
+  // 説明文の安全な取得
+  let excerpt = 'ニュースの詳細は元記事をご確認ください。';
+  try {
+    const content = item.contentSnippet || item.content || item.description || '';
+    if (content) {
+      excerpt = content
+        .replace(/<[^>]*>/g, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .substring(0, 120);
+      if (excerpt.length >= 120) {
+        excerpt += '...';
+      }
+    }
+  } catch (e) {
+    console.error(`Excerpt parsing error for ${feed.name}:`, e.message);
   }
   
-  excerpt = excerpt.substring(0, 150).trim() + '...';
+  // タイトルの安全な取得
+  let title = 'タイトルなし';
+  try {
+    if (item.title) {
+      title = String(item.title).trim();
+    }
+  } catch (e) {
+    console.error(`Title parsing error for ${feed.name}:`, e.message);
+  }
+  
+  // URLの安全な取得
+  let url = '#';
+  try {
+    if (item.link) {
+      url = String(item.link);
+    }
+  } catch (e) {
+    console.error(`URL parsing error for ${feed.name}:`, e.message);
+  }
   
   return {
-    id: `${feed.id}-${index}-${Date.now()}`,
+    id: `${feed.id}-${index}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     team: feed.teamId,
     teamName: feed.name,
-    title: item.title || 'タイトルなし',
-    date: date.toISOString().split('T')[0],
+    title: title,
+    date: dateStr,
     source: `${feed.name}公式`,
-    url: item.link || '#',
+    url: url,
     excerpt: excerpt
   };
 });
 ```
 
 } catch (error) {
-console.error(`Error fetching ${feed.name}:`, error.message);
+console.error(`Critical error fetching ${feed.name}:`, error);
 return [];
 }
 }
 
 exports.handler = async (event, context) => {
-// CORSヘッダーを設定
 const headers = {
 ‘Access-Control-Allow-Origin’: ‘*’,
 ‘Access-Control-Allow-Headers’: ‘Content-Type’,
 ‘Access-Control-Allow-Methods’: ‘GET, OPTIONS’,
-‘Content-Type’: ‘application/json’,
+‘Content-Type’: ‘application/json; charset=utf-8’,
 ‘Cache-Control’: ‘public, max-age=300’
 };
 
-// OPTIONSリクエスト（プリフライト）への対応
 if (event.httpMethod === ‘OPTIONS’) {
 return {
 statusCode: 200,
@@ -136,58 +125,71 @@ body: ‘’
 }
 
 try {
-console.log(‘Starting RSS feed fetch…’);
+console.log(’=== Starting RSS feed fetch ===’);
+console.log(‘Time:’, new Date().toISOString());
 
 ```
 const allNews = [];
 
-// 全フィードを並行取得（タイムアウト付き）
-const feedPromises = RSS_FEEDS.map(feed => 
-  Promise.race([
-    fetchFeed(feed),
-    new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Timeout')), 8000)
-    )
-  ]).catch(err => {
-    console.error(`Failed to fetch ${feed.name}:`, err.message);
-    return [];
-  })
-);
+// 各フィードを順次取得（並行処理だとタイムアウトしやすい）
+for (const feed of RSS_FEEDS) {
+  try {
+    const news = await fetchFeed(feed);
+    if (news && news.length > 0) {
+      allNews.push(...news);
+      console.log(`Added ${news.length} items from ${feed.name}`);
+    }
+  } catch (error) {
+    console.error(`Failed to process ${feed.name}:`, error.message);
+  }
+}
 
-const results = await Promise.all(feedPromises);
-results.forEach(news => {
-  if (Array.isArray(news)) {
-    allNews.push(...news);
+console.log(`Total news items collected: ${allNews.length}`);
+
+// 日付でソート
+allNews.sort((a, b) => {
+  try {
+    return new Date(b.date) - new Date(a.date);
+  } catch (e) {
+    return 0;
   }
 });
 
-console.log(`Fetched ${allNews.length} news items`);
+const response = {
+  news: allNews,
+  lastUpdated: new Date().toISOString(),
+  count: allNews.length,
+  status: 'success'
+};
 
-// 日付でソート（新しい順）
-allNews.sort((a, b) => new Date(b.date) - new Date(a.date));
+console.log('=== Fetch complete ===');
 
 return {
   statusCode: 200,
   headers,
-  body: JSON.stringify({
-    news: allNews,
-    lastUpdated: new Date().toISOString(),
-    count: allNews.length
-  })
+  body: JSON.stringify(response)
 };
 ```
 
 } catch (error) {
-console.error(‘Error in handler:’, error);
+console.error(’=== Handler error ===’);
+console.error(‘Error:’, error);
+console.error(‘Stack:’, error.stack);
+
+```
 return {
-statusCode: 500,
-headers,
-body: JSON.stringify({
-error: ‘ニュースの取得に失敗しました’,
-message: error.message,
-news: [],
-lastUpdated: new Date().toISOString()
-})
+  statusCode: 200,
+  headers,
+  body: JSON.stringify({
+    error: 'ニュースの取得中にエラーが発生しました',
+    message: error.message,
+    news: [],
+    lastUpdated: new Date().toISOString(),
+    count: 0,
+    status: 'error'
+  })
 };
+```
+
 }
 };
