@@ -1,13 +1,9 @@
 [build]
-# 公開ディレクトリはルート直下
-publish = "."
+  publish = "."
+  functions = "netlify/functions"
+  command = "npm install"
 
-# サーバーレス関数の場所
-functions = "netlify/functions"
-
-# SPAでない場合はredirectsは不要
-# SPAの場合のみ下記を追加
-#[[redirects]]
-#  from = "/*"
-#  to = "/index.html"
-#  status = 200
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
