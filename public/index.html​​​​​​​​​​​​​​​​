@@ -20,9 +20,227 @@
 </head>
 <body>
   <div id="app"></div>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script type="text/babel" src="../src/app.js"></script>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const BLeagueNews = () => {
+      const [selectedTeam, setSelectedTeam] = useState('all');
+      const [searchText, setSearchText] = useState('');
+      const [news, setNews] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [error, setError] = useState(null);
+      const [lastUpdated, setLastUpdated] = useState(null);
+
+      const teams = [
+        { id: 'all', name: '全て', color: '#1e40af' },
+        { id: 'japan', name: '日本代表', color: '#dc2626' },
+        { id: 'alvark', name: 'アルバルク東京', color: '#dc2626' },
+        { id: 'levanga', name: 'レバンガ北海道', color: '#7c3aed' },
+        { id: 'akita', name: '秋田ノーザンハピネッツ', color: '#059669' },
+        { id: 'sendai', name: '仙台89ERS', color: '#000000' },
+        { id: 'gunma', name: '群馬クレインサンダーズ', color: '#dc2626' },
+        { id: 'utsunomiya', name: '宇都宮ブレックス', color: '#fbbf24' },
+        { id: 'chiba', name: '千葉ジェッツ', color: '#dc2626' },
+        { id: 'kawasaki', name: '川崎ブレイブサンダース', color: '#2563eb' },
+        { id: 'yokohama', name: '横浜ビー・コルセアーズ', color: '#2563eb' },
+        { id: 'niigata', name: '新潟アルビレックスBB', color: '#f97316' },
+        { id: 'toyama', name: '富山グラウジーズ', color: '#000000' },
+        { id: 'sunrockers', name: 'サンロッカーズ渋谷', color: '#dc2626' },
+        { id: 'nagoya', name: '名古屋ダイヤモンドドルフィンズ', color: '#2563eb' },
+        { id: 'seahorses', name: 'シーホース三河', color: '#dc2626' },
+        { id: 'shiga', name: '滋賀レイクス', color: '#2563eb' },
+        { id: 'kyoto', name: '京都ハンナリーズ', color: '#ec4899' },
+        { id: 'osaka', name: '大阪エヴェッサ', color: '#2563eb' },
+        { id: 'shimane', name: '島根スサノオマジック', color: '#059669' },
+        { id: 'hiroshima', name: '広島ドラゴンフライズ', color: '#dc2626' },
+        { id: 'ryukyu', name: '琉球ゴールデンキングス', color: '#fbbf24' }
+      ];
+
+      useEffect(() => {
+        fetchNews();
+      }, []);
+
+      const fetchNews = async () => {
+        setLoading(true);
+        setError(null);
+        
+        try {
+          const response = await fetch('/.netlify/functions/fetch-rss');
+          
+          if (!response.ok) {
+            throw new Error('ニュースの取得に失敗しました');
+          }
+          
+          const data = await response.json();
+          setNews(data.news || []);
+          setLastUpdated(data.lastUpdated);
+        } catch (err) {
+          console.error('Error fetching news:', err);
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      const filteredNews = news.filter(item => {
+        const matchesTeam = selectedTeam === 'all' || item.team === selectedTeam;
+        const matchesSearch = item.title.toLowerCase().includes(searchText.toLowerCase()) ||
+                             item.teamName.toLowerCase().includes(searchText.toLowerCase());
+        return matchesTeam && matchesSearch;
+      });
+
+      return (
+        <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white pb-20">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white sticky top-0 z-10 shadow-lg">
+            <div className="px-4 py-4">
+              <div className="flex items-center justify-between mb-3">
+                <h1 className="text-2xl font-bold">🏀 Bリーグニュース</h1>
+                <button
+                  onClick={fetchNews}
+                  disabled={loading}
+                  className="px-3 py-1 bg-white text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors disabled:opacity-50"
+                >
+                  {loading ? '更新中...' : '更新'}
+                </button>
+              </div>
+              
+              <div className="relative mb-3">
+                <input
+                  type="text"
+                  placeholder="ニュースを検索..."
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  className="w-full px-4 py-2 pl-10 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                />
+                <svg className="absolute left-3 top-2.5 text-gray-400" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+
+              <div className="overflow-x-auto -mx-4 px-4">
+                <div className="flex gap-2 pb-2" style={{ minWidth: 'max-content' }}>
+                  {teams.map(team => (
+                    <button
+                      key={team.id}
+                      onClick={() => setSelectedTeam(team.id)}
+                      className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                        selectedTeam === team.id
+                          ? 'bg-white text-blue-600 shadow-md scale-105'
+                          : 'bg-blue-700 text-white hover:bg-blue-600'
+                      }`}
+                    >
+                      {team.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="px-4 py-4">
+            {lastUpdated && (
+              <div className="mb-4 text-xs text-gray-500">
+                最終更新: {new Date(lastUpdated).toLocaleString('ja-JP')}
+              </div>
+            )}
+
+            {loading ? (
+              <div className="text-center py-12">
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+                <p className="mt-4 text-gray-600">ニュースを読み込み中...</p>
+              </div>
+            ) : error ? (
+              <div className="text-center py-12">
+                <p className="text-red-500 text-lg mb-4">⚠️ {error}</p>
+                <button
+                  onClick={fetchNews}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  再試行
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="mb-4">
+                  <p className="text-sm text-gray-600">
+                    {filteredNews.length}件のニュース
+                  </p>
+                </div>
+
+                {filteredNews.length === 0 ? (
+                  <div className="text-center py-12">
+                    <p className="text-gray-500 text-lg">ニュースが見つかりませんでした</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {filteredNews.map(item => (
+                      <div
+                        key={item.id}
+                        className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow overflow-hidden"
+                      >
+                        <div className="p-4">
+                          <div className="flex items-start justify-between mb-2">
+                            <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">
+                              {item.teamName}
+                            </span>
+                            <div className="flex items-center text-xs text-gray-500">
+                              <svg className="mr-1" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                              {item.date}
+                            </div>
+                          </div>
+                          
+                          <h2 className="text-lg font-bold text-gray-800 mb-2 leading-snug">
+                            {item.title}
+                          </h2>
+                          
+                          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                            {item.excerpt}
+                          </p>
+                          
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-gray-500">{item.source}</span>
+                            <a
+                              href={item.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center text-blue-600 text-sm font-medium hover:text-blue-800 transition-colors"
+                            >
+                              詳細を見る
+                              <svg className="ml-1" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              </svg>
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+
+          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 shadow-lg">
+            <p className="text-xs text-center text-gray-500">
+              各クラブ公式サイトのRSSフィードから取得しています
+            </p>
+          </div>
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('app'));
+    root.render(<BLeagueNews />);
+  </script>
+
 </body>
 </html>
