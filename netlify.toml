@@ -1,3 +1,13 @@
 [build]
-  publish = "public"
-  functions = "netlify/functions"
+# 公開ディレクトリはルート直下
+publish = "."
+
+# サーバーレス関数の場所
+functions = "netlify/functions"
+
+# SPAでない場合はredirectsは不要
+# SPAの場合のみ下記を追加
+#[[redirects]]
+#  from = "/*"
+#  to = "/index.html"
+#  status = 200
