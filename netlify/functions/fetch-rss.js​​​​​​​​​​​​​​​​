@@ -10,7 +10,6 @@ item: [‘description’, ‘content:encoded’, ‘pubDate’]
 // B1クラブと日本代表のRSSフィード
 const RSS_FEEDS = [
 {
-  
 id: ‘japan’,
 name: ‘日本代表’,
 url: ‘https://www.japanbasketball.jp/feed/’,
