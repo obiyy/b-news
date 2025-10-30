@@ -146,7 +146,6 @@ try {
 console.log('Fetching:', feed.name);
 const result = await parser.parseURL(feed.url);
 
-```
 if (!result || !result.items || result.items.length === 0) {
   console.log('No items for:', feed.name);
   return [];
@@ -202,7 +201,7 @@ const newsItems = result.items.slice(0, 10).map((item, index) => {
 
 console.log('Success:', feed.name, newsItems.length, 'items');
 return newsItems;
-```
+
 
 } catch (error) {
 console.error('Error fetching', feed.name + ':', error.message);
@@ -227,7 +226,6 @@ console.log('=== Starting RSS fetch ===');
 console.log('Time:', new Date().toISOString());
 console.log('Feeds to fetch:', RSS_FEEDS.length);
 
-```
 const allNews = [];
 
 for (const feed of RSS_FEEDS) {
@@ -260,13 +258,11 @@ return {
     status: 'success'
   })
 };
-```
 
 } catch (error) {
 console.error('=== Handler error ===');
 console.error(error);
 
-```
 return {
   statusCode: 200,
   headers,
@@ -278,7 +274,6 @@ return {
     status: 'error'
   })
 };
-```
 
 }
 };
