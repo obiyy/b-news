@@ -80,13 +80,21 @@
             <div className="px-4 py-4">
               <div className="flex items-center justify-between mb-3">
                 <h1 className="text-2xl font-bold">🏀 Bリーグニュース</h1>
-                <button
-                  onClick={fetchNews}
-                  disabled={loading}
-                  className="px-3 py-1 bg-white text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors disabled:opacity-50"
-                >
-                  {loading ? '更新中...' : '更新'}
-                </button>
+                <div className="flex gap-2">
+                  <a
+                    href="kyoto.html"
+                    className="px-3 py-1 bg-pink-500 text-white rounded-lg text-sm font-medium hover:bg-pink-600 transition-colors"
+                  >
+                    京都
+                  </a>
+                  <button
+                    onClick={fetchNews}
+                    disabled={loading}
+                    className="px-3 py-1 bg-white text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors disabled:opacity-50"
+                  >
+                    {loading ? '更新中...' : '更新'}
+                  </button>
+                </div>
               </div>
               
               <div className="relative mb-3">
