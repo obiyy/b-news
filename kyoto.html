@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>京都ハンナリーズ - 最新情報</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .instagram-embed {
+      max-width: 540px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script async src="https://www.instagram.com/embed.js"></script>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const KyotoInstagram = () => {
+      const [embedCode, setEmbedCode] = useState('');
+
+      useEffect(() => {
+        // Instagramの埋め込みスクリプトを再実行
+        if (window.instgrm) {
+          window.instgrm.Embeds.process();
+        }
+      }, [embedCode]);
+
+      const handleEmbedSubmit = (e) => {
+        e.preventDefault();
+        const input = e.target.elements.embedInput.value;
+        setEmbedCode(input);
+        
+        // 埋め込みコードを処理後、Instagramスクリプトを再実行
+        setTimeout(() => {
+          if (window.instgrm) {
+            window.instgrm.Embeds.process();
+          }
+        }, 100);
+      };
+
+      return (
+        <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white">
+          {/* ヘッダー */}
+          <div className="bg-gradient-to-r from-pink-600 to-pink-800 text-white shadow-lg">
+            <div className="px-4 py-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h1 className="text-3xl font-bold mb-1">京都ハンナリーズ</h1>
+                  <p className="text-pink-100 text-sm">Instagram 最新情報</p>
+                </div>
+                <a
+                  href="index.html"
+                  className="px-4 py-2 bg-white text-pink-600 rounded-lg text-sm font-medium hover:bg-pink-50 transition-colors"
+                >
+                  ← ニュース一覧
+                </a>
+              </div>
+              
+              <div className="flex items-center gap-3 text-sm">
+                <a
+                  href="https://www.instagram.com/kyotohannaryz/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 bg-pink-700 hover:bg-pink-600 px-4 py-2 rounded-lg transition-colors"
+                >
+                  <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                  </svg>
+                  公式Instagramを見る
+                </a>
+                <a
+                  href="https://hannaryz.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 bg-pink-700 hover:bg-pink-600 px-4 py-2 rounded-lg transition-colors"
+                >
+                  公式サイト
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* メインコンテンツ */}
+          <div className="max-w-4xl mx-auto px-4 py-8">
+            {/* 埋め込みコード入力フォーム */}
+            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+              <h2 className="text-xl font-bold text-gray-800 mb-4">Instagram投稿を追加</h2>
+              <form onSubmit={handleEmbedSubmit}>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Instagram埋め込みコード
+                  </label>
+                  <textarea
+                    name="embedInput"
+                    rows="4"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+                    placeholder='<blockquote class="instagram-media" ... ></blockquote>'
+                  ></textarea>
+
+```
+              <p className="mt-2 text-xs text-gray-500">
+                Instagramの投稿ページで「埋め込み」→「埋め込みコードをコピー」して貼り付けてください
+              </p>
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-pink-600 text-white py-3 rounded-lg font-medium hover:bg-pink-700 transition-colors"
+            >
+              投稿を表示
+            </button>
+          </form>
+        </div>
+
+        {/* 埋め込み投稿の表示エリア */}
+        {embedCode ? (
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div 
+              className="instagram-embed"
+              dangerouslySetInnerHTML={{ __html: embedCode }}
+            />
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow-md p-8 text-center">
+            <svg className="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <p className="text-gray-600 mb-4">Instagram投稿がまだ追加されていません</p>
+            <p className="text-sm text-gray-500">
+              上のフォームから埋め込みコードを追加してください
+            </p>
+          </div>
+        )}
+
+        {/* 使い方ガイド */}
+        <div className="mt-8 bg-blue-50 rounded-lg p-6">
+          <h3 className="font-bold text-gray-800 mb-3">📖 使い方</h3>
+          <ol className="space-y-2 text-sm text-gray-700">
+            <li className="flex gap-2">
+              <span className="font-bold">1.</span>
+              <span>京都ハンナリーズの<a href="https://www.instagram.com/kyotohannaryz/" target="_blank" className="text-blue-600 underline">公式Instagram</a>を開く</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="font-bold">2.</span>
+              <span>表示したい投稿を選んで「...」メニューから「埋め込み」を選択</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="font-bold">3.</span>
+              <span>「埋め込みコードをコピー」をクリック</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="font-bold">4.</span>
+              <span>上のフォームに貼り付けて「投稿を表示」ボタンをクリック</span>
+            </li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const root = ReactDOM.createRoot(document.getElementById('app'));
+root.render(<KyotoInstagram />);
+```
+
+  </script>
+</body>
+</html>
