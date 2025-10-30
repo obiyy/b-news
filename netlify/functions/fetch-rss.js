@@ -16,7 +16,7 @@ team: 'japan'
 {
 id: 'bleague',
 name: 'Bリーグ公式',
-url: 'https://www.bleague.jp/feed/',
+url: 'https://www.bleague.jp/files/topics/rss/group7.rdf',
 team: 'bleague'
 },
 {
