@@ -173,7 +173,6 @@ body: ‘’
 try {
 const allNews = [];
 
-```
 // 全フィードを並行取得
 const feedPromises = RSS_FEEDS.map(async (feed) => {
   try {
@@ -209,7 +208,6 @@ return {
     lastUpdated: new Date().toISOString()
   })
 };
-```
 
 } catch (error) {
 console.error(‘Error:’, error);
